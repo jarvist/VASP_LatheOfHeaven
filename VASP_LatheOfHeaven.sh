@@ -5,7 +5,12 @@
 # Accelerated convergence of MAPI structures
 # A work in progress - Jarvist Moore Frost
 
-VASP="mpirun -np 24 /opt/vasp5.3.5-gamma"
+VASPGAMMA="mpirun -np 24 /opt/vasp5.3.5-gamma"
+VASP="mpirun -np 24 /opt/vasp5.3.5"
+
+k_gamma="1 1 1"
+k_222="2 2 2"
+k_final="6 6 6"
 
 # IBRION = 1 ; RMM-DIIS
 # IBRION = 2 ; conjugate gradients. STEP=1, forces, STEP=2, Trial, STEP=3, correction, and so on.
@@ -18,32 +23,56 @@ VASP="mpirun -np 24 /opt/vasp5.3.5-gamma"
 # ISIF = 6 ; Cell shape and volume
 # ISIF = 7 ; Cell volume only
 
+# Coarse volume of unit cell, with 3 steps RMM-DIIS
 recipe[1]="IBRION = 1
 POTIM = 0.15
 ISIF = 7 
 NSW = 3"
+kpoints[1]="$k_gamma"
 
+# Coarse shape of unit cell, with 3 steps RMM-DIIS
 recipe[2]="IBRION = 1
 POTIM = 0.15
 ISIF = 5 
 NSW = 3"
+kpoints[2]="$k_gamma"
 
+# Conjugate gradient volume of unit cell
 recipe[3]="IBRION = 2
 POTIM = 0.15
 ISIF = 2
 NSW = 7"
+k_points[3]="$k_gamma"
 
+# RMM-DIIS of volume and shape of unit cell
 recipe[4]="IBRION = 1
 POTIM = 0.15
 ISIF = 6 
 NSW = 5"
+k_points[4]="$k_gamma"
 
+# Conjugate gradient of everything
 recipe[5]="IBRION = 2
 POTIM = 0.15
 ISIF = 3 
 NSW = 9"
+k_points[5]="$k_gamma"
 
-recipes=5
+# OK; best guess at Gamma!
+
+recipe[6]="IBRION = 2
+POTIM = 0.15
+ISIF = 3 
+NSW = 9"
+k_points[6]="$k_222"
+
+recipe[7]="IBRION = 2
+POTIM = 0.15
+ISIF = 3 
+NSW = 9"
+k_points[7]="$k_222"
+
+recipes=7
 
 for id in ` seq ${recipes} `
 do
@@ -53,20 +82,47 @@ do
 
     # OK, make a sub folder
     mkdir "${recipefolder}"
+    
     # Construct the full INCAR
     cat INCAR > "${recipefolder}/INCAR"
     echo "${recipe[$id]}" >> "${recipefolder}/INCAR"
-    # Copy KPOINTS, POTCAR, POSCAR
-    cat POSCAR > "${recipefolder}/POSCAR"
-    cat KPOINTS > "${recipefolder}/KPOINTS"
+    
+    # Copy POTCAR, POSCAR
+    cp -a POSCAR "${recipefolder}/POSCAR"
     cp -a POTCAR "${recipefolder}/POTCAR"
+    
+    # Compose KPOINTS file
+    cat  > "${recipefolder}/KPOINTS" << EOF
+Automatic mesh
+0
+Gamma
+  ${k_points[$id]} 
+0.  0.  0.
+EOF
+    
 
     # OK; now run vasp!
     cd "${recipefolder}"
-    echo "Here goes VASP!"
-    ${VASP}
+    
+    if [ "${k_points[$id]}" == "${k_gamma}" ]
+    then
+        echo "Here goes VASP-GAMMA!"
+        ${VASPGAMMA}
+    else
+        echo "Here goes VASP!"
+        ${VASP}
+    fi
+
     echo "VASP finished (or crashed... =)"
     # recycle CONTCAR --> POSCAR for next round
     cp -a CONTCAR ../POSCAR
     cd -
 done
+
+cat << EOF
+
+"The end justifies the means. But what if there never is an end? All we have is means." 
+     - Ursula K. Le Guin, The Lathe of Heaven
+
+EOF
+
