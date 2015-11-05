@@ -1,0 +1,11 @@
+```
+"The end justifies the means. But what if there never is an end? All we have is means." 
+     - Ursula K. Le Guin, The Lathe of Heaven
+```
+
+An attempt to build a semi-automated method of converging difficult structures in VASP. 
+You are often suggested to use a confusing set of: ISIF 7... ISIF 2... ISIF... arggh!
+So why not automate it?
+
+A work in progress - Jarvist Moore Frost
+
