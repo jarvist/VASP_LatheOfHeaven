@@ -28,14 +28,14 @@ recipe[1]="IBRION = 1
 POTIM = 0.15
 ISIF = 7 
 NSW = 3"
-kpoints[1]="$k_gamma"
+k_points[1]="$k_gamma"
 
 # Coarse shape of unit cell, with 3 steps RMM-DIIS
 recipe[2]="IBRION = 1
 POTIM = 0.15
 ISIF = 5 
 NSW = 3"
-kpoints[2]="$k_gamma"
+k_points[2]="$k_gamma"
 
 # Conjugate gradient volume of unit cell
 recipe[3]="IBRION = 2
