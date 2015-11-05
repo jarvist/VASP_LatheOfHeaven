@@ -8,7 +8,8 @@
 VASP="mpirun -np 24 /opt/vasp5.3.5-gamma"
 
 # IBRION = 1 ; RMM-DIIS
-# IBRION = 2 ; conjugate gradients. STEP=1, forces, STEP=2, Trial, STEP=3, correction, and so on. 
+# IBRION = 2 ; conjugate gradients. STEP=1, forces, STEP=2, Trial, STEP=3, correction, and so on.
+#              i.e. NSW=3,5,7,9 etc.
 # IBRION = 3 ; Damped MD. Supply SMASS and POTIM
 
 # ISIF = 2 ; Move atoms only
@@ -63,7 +64,7 @@ do
     # OK; now run vasp!
     cd "${recipefolder}"
     echo "Here goes VASP!"
-    "${VASP}"
+    ${VASP}
     echo "VASP finished (or crashed... =)"
     # recycle CONTCAR --> POSCAR for next round
     cp -a CONTCAR ../POSCAR
