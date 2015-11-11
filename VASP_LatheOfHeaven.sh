@@ -1,3 +1,4 @@
+#!/bin/bash -xv 
 # "The end justifies the means. But what if there never is an end? All we have is means." 
 #     - Ursula K. Le Guin, The Lathe of Heaven
 
@@ -23,31 +24,35 @@ k_final="6 6 6"
 # ISIF = 6 ; Cell shape and volume
 # ISIF = 7 ; Cell volume only
 
+# See Kresse slides: http://inside.mines.edu/~zhiwu/research/slides/B05_opt.pdf
+# For very useful description of ionic relaxation
+
 # Coarse volume of unit cell, with 3 steps RMM-DIIS
 recipe[1]="ISIF = 7 
-IBRION = 1
-POTIM = 0.15
+IBRION = 2
+POTIM = 0.5
 NSW = 3"
 k_points[1]="$k_gamma"
 
 # Coarse shape of unit cell, with 3 steps RMM-DIIS
 recipe[2]="ISIF = 5 
-IBRION = 1
-POTIM = 0.15
+IBRION = 2
+POTIM = 0.5
 NSW = 3"
 k_points[2]="$k_gamma"
 
-# Conjugate gradient volume of unit cell
+# Conjugate gradient ionic position
 recipe[3]="ISIF = 2
-IBRION = 2
+IBRION = 3
+SMASS = 0.15
 POTIM = 0.15
-NSW = 7"
+NSW = 21"
 k_points[3]="$k_gamma"
 
-# RMM-DIIS of volume and shape of unit cell
+# C.G. volume and shape of unit cell
 recipe[4]="ISIF = 6 
-IBRION = 1
-POTIM = 0.15
+IBRION = 2
+POTIM = 0.5
 NSW = 5"
 k_points[4]="$k_gamma"
 
@@ -67,8 +72,8 @@ NSW = 9"
 k_points[6]="$k_222"
 
 recipe[7]="ISIF = 6 
-IBRION = 1
-POTIM = 0.15
+IBRION = 2
+POTIM = 0.5
 NSW = 5"
 k_points[7]="$k_222"
 
@@ -81,22 +86,23 @@ k_points[8]="$k_222"
 # OK, final k-mesh
 
 recipe[9]="ISIF = 6 
-IBRION = 1
-POTIM = 0.15
+IBRION = 2
+POTIM = 0.5
 NSW = 5"
 k_points[9]="$k_final"
 
 recipe[10]="ISIF = 2 
-IBRION = 2
+IBRION = 3
+SMASS = 0.15
 POTIM = 0.15
 NSW = 21"
 k_points[10]="$k_final"
 
 recipes=10
 
-for id in ` seq -w ${recipes} `
+for id in ` seq ${recipes} `
 do
-    recipefolder="recipe-${id}"
+    recipefolder=` printf "recipe-%02d" ${id} `
     echo "Cooking up ===> " "${recipefolder}"
     echo "${recipe[$id]}"
 
