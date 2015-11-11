@@ -24,57 +24,77 @@ k_final="6 6 6"
 # ISIF = 7 ; Cell volume only
 
 # Coarse volume of unit cell, with 3 steps RMM-DIIS
-recipe[1]="IBRION = 1
+recipe[1]="ISIF = 7 
+IBRION = 1
 POTIM = 0.15
-ISIF = 7 
 NSW = 3"
 k_points[1]="$k_gamma"
 
 # Coarse shape of unit cell, with 3 steps RMM-DIIS
-recipe[2]="IBRION = 1
+recipe[2]="ISIF = 5 
+IBRION = 1
 POTIM = 0.15
-ISIF = 5 
 NSW = 3"
 k_points[2]="$k_gamma"
 
 # Conjugate gradient volume of unit cell
-recipe[3]="IBRION = 2
+recipe[3]="ISIF = 2
+IBRION = 2
 POTIM = 0.15
-ISIF = 2
 NSW = 7"
 k_points[3]="$k_gamma"
 
 # RMM-DIIS of volume and shape of unit cell
-recipe[4]="IBRION = 1
+recipe[4]="ISIF = 6 
+IBRION = 1
 POTIM = 0.15
-ISIF = 6 
 NSW = 5"
 k_points[4]="$k_gamma"
 
-# Conjugate gradient of everything
-recipe[5]="IBRION = 2
+# Conjugate gradient of ion posn
+recipe[5]="ISIF = 2 
+IBRION = 2
 POTIM = 0.15
-ISIF = 3 
-NSW = 9"
+NSW = 21"
 k_points[5]="$k_gamma"
 
 # OK; best guess at Gamma!
 
-recipe[6]="IBRION = 2
+recipe[6]="ISIF = 2 
+IBRION = 2
 POTIM = 0.15
-ISIF = 3 
 NSW = 9"
 k_points[6]="$k_222"
 
-recipe[7]="IBRION = 2
+recipe[7]="ISIF = 6 
+IBRION = 1
 POTIM = 0.15
-ISIF = 3 
-NSW = 9"
+NSW = 5"
 k_points[7]="$k_222"
 
-recipes=7
+recipe[8]="ISIF = 2 
+IBRION = 2
+POTIM = 0.15
+NSW = 21"
+k_points[8]="$k_222"
 
-for id in ` seq ${recipes} `
+# OK, final k-mesh
+
+recipe[9]="ISIF = 6 
+IBRION = 1
+POTIM = 0.15
+NSW = 5"
+k_points[9]="$k_final"
+
+recipe[10]="ISIF = 2 
+IBRION = 2
+POTIM = 0.15
+NSW = 21"
+k_points[10]="$k_final"
+
+recipes=10
+
+for id in ` seq -w ${recipes} `
 do
     recipefolder="recipe-${id}"
     echo "Cooking up ===> " "${recipefolder}"
@@ -84,7 +104,9 @@ do
     mkdir "${recipefolder}"
     
     # Construct the full INCAR
+    ## Header of INCAR
     cat INCAR > "${recipefolder}/INCAR"
+    ## Recipe lines as specified above...
     echo "${recipe[$id]}" >> "${recipefolder}/INCAR"
     
     # Copy POTCAR, POSCAR
@@ -99,7 +121,6 @@ Gamma
   ${k_points[$id]} 
 0.  0.  0.
 EOF
-    
 
     # OK; now run vasp!
     cd "${recipefolder}"
